@@ -70,7 +70,7 @@ def plot_q_values_map(qtable, env):
 
 
 env = gym.make("CliffWalking-v0", render_mode="rgb_array")
-trigger = lambda t: t % 10000 == 0 and t != 0
+trigger = lambda t: t % 100000 == 0 and t != 0
 env = RecordVideo(env, video_folder="./save_videos1", episode_trigger=trigger, disable_logger=False)
 
 
@@ -83,7 +83,7 @@ q_table = np.zeros((n_states, n_actions))
 learning_rate = 0.2
 discount_factor = 0.9
 epsilon = 1  # Exploration rate
-num_episodes = 10001
+num_episodes = 100001
 
 # Q-learning algorithm
 for episode in range(num_episodes):
@@ -93,7 +93,7 @@ for episode in range(num_episodes):
     done = False
 
     print(episode)
-    epsilon = epsilon - epsilon/num_episodes
+    epsilon = epsilon - 1/num_episodes
     while not done:
         # Exploration vs exploitation
         if random.uniform(0, 1) < epsilon:
