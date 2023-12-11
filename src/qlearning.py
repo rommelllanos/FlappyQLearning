@@ -10,13 +10,11 @@ import seaborn as sns
 import pandas as pd
 
 def plot_q_table(q_table, episode):
-    plt.figure(figsize=(16, 20))
+    plt.figure(figsize=(8, 12))
     plt.title(f"Q-table at Episode {episode}")
 
-    # Convert the Q-table to a DataFrame for easier plotting with Seaborn
     df_q_table = pd.DataFrame(q_table)
 
-    # Create the heatmap
     sns.heatmap(df_q_table, annot=True, fmt=".2f", cmap="coolwarm", cbar=True)
 
     plt.xlabel("Actions")
@@ -49,13 +47,13 @@ def plot_q_values_map(qtable, env):
     ax[0].axis("off")
     ax[0].set_title("Last frame")
 
-    # Plot the policy
+
     sns.heatmap(
         qtable_val_max,
         annot=qtable_directions,
         fmt="",
         ax=ax[1],
-        cmap=sns.color_palette("Blues", as_cmap=True),
+        cmap=sns.color_palette("Greens", as_cmap=True),
         linewidths=0.7,
         linecolor="black",
         xticklabels=[],
@@ -70,7 +68,7 @@ def plot_q_values_map(qtable, env):
 
 
 env = gym.make("CliffWalking-v0", render_mode="rgb_array")
-trigger = lambda t: t % 100000 == 0 and t != 0
+trigger = lambda t: t % 1000 == 0 and t != 0
 env = RecordVideo(env, video_folder="./save_videos1", episode_trigger=trigger, disable_logger=False)
 
 
@@ -79,23 +77,23 @@ n_states = env.observation_space.n
 n_actions = env.action_space.n
 q_table = np.zeros((n_states, n_actions))
 
-# Hyperparameters
-learning_rate = 0.2
+
+learning_rate = 0.01
 discount_factor = 0.9
+
+#Para hacerlo greedy, poner un epsilon muy bajo
 epsilon = 1  # Exploration rate
-num_episodes = 100001
+num_episodes = 1001
 
 # Q-learning algorithm
 for episode in range(num_episodes):
-    raw_state = env.reset()  # Initialize the raw state at the start of each episode
-    state = raw_state[0]  # Extract the integer part of the state for Q-table indexing
+    raw_state = env.reset()
+    state = raw_state[0]
 
     done = False
 
-    print(episode)
-    epsilon = epsilon - 1/num_episodes
+    #epsilon = epsilon - 1/num_episodes #Reduce el epsilo a medida que avanza
     while not done:
-        # Exploration vs exploitation
         if random.uniform(0, 1) < epsilon:
             action = env.action_space.sample()  # Explore action space
         else:
@@ -106,9 +104,10 @@ for episode in range(num_episodes):
 
         done = terminated
 
-        """ if reward == -100:
-            done = True """
-
+        # Guardia necesaria para que termine si gira hacia el risco
+        if reward == -100:
+            terminated = True
+            done = True
 
         # Q-learning update
         old_value = q_table[state, action]
@@ -118,8 +117,7 @@ for episode in range(num_episodes):
         q_table[state, action] = new_value
 
 
-        state = new_state  # Update the state
-    
+        state = new_sta
 
     
 plot_q_table(q_table, episode)
